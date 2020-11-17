@@ -41,8 +41,53 @@ var (
 )
 
 var subMap = map[string]string{
-	".*sensu-backend.*": "sensu-backend",
-	"postgres.*":        "postgres",
+	"sensu-backend": "sensu-backend",
+	"node_exporter": "node-exporter",
+	"postgres":      "postgres",
+	"apache":        "apache",
+	"monit$":        "monit",
+	"httpd":         "apache",
+	"couchdb":       "couchdb",
+	"etcd":          "etcd",
+	"haproxy":       "haproxy",
+	"mongodb":       "mongodb",
+	"openvpn":       "openvpn",
+	"fluentd":       "fluentd",
+	"jenkins":       "jenkins",
+	"redis":         "redis",
+	"varnish":       "varnish",
+	"cassandra":     "cassandra",
+	"hbase":         "hbase",
+	"kafka":         "kafka",
+	"mysql":         "mysql",
+	"resque":        "resque",
+	"sidekiq":       "sidekiq",
+	"syslog":        "syslog",
+	"vsphere":       "vsphere",
+	"ceph":          "ceph",
+	"kubernetes":    "kubernetes",
+	"nginx":         "nginx",
+	"postfix":       "postfix",
+	"rethinkdb":     "rethinkdb",
+	"docker":        "docker",
+	"gitlab":        "gitlab",
+	"iis":           "iis",
+	"lxc":           "lxc",
+	"ntp":           "ntp",
+	"riak":          "riak",
+	"tomcat":        "tomcat",
+	"consul":        "consul",
+	"elasticsearch": "elasticsearch",
+	"gluster":       "gluster",
+	"solr":          "solr",
+	"tripwire":      "tripwire",
+	"memcached":     "memcached",
+	"openldap":      "openldap",
+	"rabbitmq":      "rabbitmq",
+	"spark":         "spark",
+	"zookeeper":     "zookeeper",
+	"couchbase":     "couchbase",
+	"unicorn":       "unicorn",
 }
 
 func main() {
@@ -75,6 +120,10 @@ func processSubs() ([]string, error) {
 		}
 
 		for r, s := range subMap {
+			// Not sure if we want or need regex. Regex
+			// makes more sense when dealing with the full
+			// process list line (could even match and
+			// extract specific arguments, i.e. ports).
 			m, err := regexp.Match(r, []byte(n))
 
 			if err != nil {

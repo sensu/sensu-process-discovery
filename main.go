@@ -15,7 +15,7 @@ import (
 // Config represents the check plugin config.
 type Config struct {
 	sensu.PluginConfig
-	Example string
+	SubPrefix string
 }
 
 var (
@@ -29,13 +29,13 @@ var (
 
 	options = []*sensu.PluginConfigOption{
 		&sensu.PluginConfigOption{
-			Path:      "example",
-			Env:       "CHECK_EXAMPLE",
-			Argument:  "example",
-			Shorthand: "e",
+			Path:      "subscription-prefix",
+			Env:       "SUBSCRIPTION_PREFIX",
+			Argument:  "subscription-prefix",
+			Shorthand: "p",
 			Default:   "",
-			Usage:     "An example string configuration option",
-			Value:     &plugin.Example,
+			Usage:     "The agent subscription name prefix",
+			Value:     &plugin.SubPrefix,
 		},
 	}
 )
@@ -132,7 +132,7 @@ func processSubs() ([]string, error) {
 
 			if m {
 				if _, e := subsSet[s]; !e {
-					subs = append(subs, s)
+					subs = append(subs, plugin.SubPrefix+s)
 					subsSet[s] = true
 				}
 			}

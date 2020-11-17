@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"strings"
+	"time"
 
 	"github.com/sensu-community/sensu-plugin-sdk/sensu"
-	"github.com/sensu/sensu-go/types"
+	corev2 "github.com/sensu/sensu-go/api/core/v2"
+	"github.com/shirou/gopsutil/process"
 )
 
 // Config represents the check plugin config.
@@ -41,14 +44,41 @@ func main() {
 	check.Execute()
 }
 
-func checkArgs(event *types.Event) (int, error) {
-	if len(plugin.Example) == 0 {
-		return sensu.CheckStateWarning, fmt.Errorf("--example or CHECK_EXAMPLE environment variable is required")
-	}
+func checkArgs(event *corev2.Event) (int, error) {
 	return sensu.CheckStateOK, nil
 }
 
-func executeCheck(event *types.Event) (int, error) {
-	log.Println("executing check with --example", plugin.Example)
+func processSubs() ([]string, error) {
+	subs := []string{}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10)*time.Second)
+	defer cancel()
+
+	plist, err := process.ProcessesWithContext(ctx)
+
+	if err != nil {
+		return subs, err
+	}
+
+	for _, p := range plist {
+		name, err := p.NameWithContext(ctx)
+
+		if err == nil {
+			subs = append(subs, name)
+		}
+	}
+
+	return subs, nil
+}
+
+func executeCheck(event *corev2.Event) (int, error) {
+	subs, err := processSubs()
+
+	fmt.Println(strings.Join(subs, "\n"))
+
+	if err != nil {
+		return sensu.CheckStateWarning, err
+	}
+
 	return sensu.CheckStateOK, nil
 }

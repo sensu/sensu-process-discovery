@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 
@@ -39,6 +40,11 @@ var (
 	}
 )
 
+var subMap = map[string]string{
+	".*sensu-backend.*": "sensu-backend",
+	"postgres.*":        "postgres",
+}
+
 func main() {
 	check := sensu.NewGoCheck(&plugin.PluginConfig, options, checkArgs, executeCheck, false)
 	check.Execute()
@@ -50,6 +56,7 @@ func checkArgs(event *corev2.Event) (int, error) {
 
 func processSubs() ([]string, error) {
 	subs := []string{}
+	subsSet := make(map[string]bool)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(10)*time.Second)
 	defer cancel()
@@ -61,10 +68,26 @@ func processSubs() ([]string, error) {
 	}
 
 	for _, p := range plist {
-		name, err := p.NameWithContext(ctx)
+		n, err := p.NameWithContext(ctx)
 
-		if err == nil {
-			subs = append(subs, name)
+		if err != nil {
+			continue
+		}
+
+		for r, s := range subMap {
+			m, err := regexp.Match(r, []byte(n))
+
+			if err != nil {
+				continue
+			}
+
+			if m {
+				if _, e := subsSet[s]; !e {
+					subs = append(subs, s)
+					subsSet[s] = true
+				}
+			}
+
 		}
 	}
 

@@ -82,11 +82,14 @@ metadata:
   name: sensu-process-discovery
   namespace: default
 spec:
-  command: sensu-process-discovery -p ad:
+  command: >-
+    sensu-process-discovery -p ad:
   subscriptions:
   - discovery
   runtime_assets:
   - sensu/sensu-process-discovery
+  interval: 60
+  publish: true
 ```
 
 ## Installation from source
